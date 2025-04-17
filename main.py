@@ -5,7 +5,7 @@ from schemas import SensorData, PredictionResult
 app = FastAPI()
 
 @app.post("/predict", response_model=PredictionResult)
-def predict(data: SensorData):
+async def predict(data: SensorData):
     # Mock logic
     if data.sensorType == "Temperature" and data.value > 30:
         status = "warning"
