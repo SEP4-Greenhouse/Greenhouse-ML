@@ -1,23 +1,23 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11.7-slim
+# ✅ Use slimmer but compatible image
+FROM python:3.12-slim
 
-# Install security updates
+# 🛠️ Install dependencies
 RUN apt-get update && \
-	apt-get upgrade -y && \
-	apt-get clean && \
-	rm -rf /var/lib/apt/lists/*
+    apt-get install -y build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy all project files
+# Copy files
 COPY . .
 
-# Install dependencies
+# Install Python deps
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose port FastAPI will run on
+# Expose port
 EXPOSE 8000
 
-# Start the FastAPI app
+# Start the app
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
