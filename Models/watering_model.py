@@ -1,1 +1,0 @@
-# Predicting optimal watering time
