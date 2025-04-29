@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from app.api.predict import router as predict_router
+from app.Api import predict
 
 app = FastAPI()
-app.include_router(predict_router)
+
+app.include_router(predict.router)
