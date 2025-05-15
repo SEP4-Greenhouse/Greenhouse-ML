@@ -1,26 +1,35 @@
+# Application/services/predictor.py
+
 from datetime import datetime
-from Application.services.predictor import analyze_prediction
-
-from Application.schema.predict import PredictionRequest, PredictionResult
 import os
+from Application.schema.predict import PredictionRequest, PredictionResult
 
-# Set the humidity threshold for triggering irrigation (default: 30%)
-WATER_THRESHOLD = float(os.getenv("WATER_THRESHOLD", 30.0))
+# Default humidity threshold for triggering irrigation
+WATER_THRESHOLD = float(os.getenv("WATER_THRESHOLD", 30.0))  # Can be overridden via .env
 
 def analyze_prediction(request: PredictionRequest) -> PredictionResult:
     """
     Analyze incoming sensor data and return a structured prediction result.
 
-    - For temperature: Trigger cooling if value > 30°C.
-    - For humidity: Trigger irrigation if value < threshold (default 30%).
-    - Optional: If history is included, compute rate of change over time to
-      provide trend analysis.
+    Logic:
+    - If sensorType is 'temperature' and value > 30°C: trigger cooling
+    - If sensorType is 'humidity' and value < WATER_THRESHOLD: trigger irrigation
+    - Otherwise: status is normal
+
+    If historical data is included, calculate the rate of change
+    and return a trend analysis.
+
+    Args:
+        request (PredictionRequest): Contains current sensor reading and optional history
+
+    Returns:
+        PredictionResult: Includes status, suggestion, and optional trendAnalysis
     """
 
-    data = request.current       # Current sensor reading
-    history = request.history    # Optional list of past readings
+    data = request.current
+    history = request.history
 
-    # Rule-based decision logic
+    # Decision logic
     if data.sensorType.lower() == "temperature" and data.value > 30:
         status = "warning"
         suggestion = "Activate cooling"
@@ -31,7 +40,7 @@ def analyze_prediction(request: PredictionRequest) -> PredictionResult:
         status = "normal"
         suggestion = "No action needed"
 
-    # Analyze historical trend if available
+    # Optional: Trend analysis based on historical values
     trend_analysis = None
     if history:
         values = [entry.value for entry in history] + [data.value]
@@ -48,7 +57,6 @@ def analyze_prediction(request: PredictionRequest) -> PredictionResult:
                 else:
                     trend_analysis = "Humidity stable"
 
-    # Return prediction result object with status and optional trend
     return PredictionResult(
         timestamp=datetime.utcnow(),
         status=status,

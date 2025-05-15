@@ -1,29 +1,36 @@
-# Application/Services/logger.py
+# Application/services/logger.py
 
-from Application.Models.prediction_log import PredictionLog
+import os
+import requests
 from Application.schema.predict import SensorData, PredictionResult
-from sqlalchemy.orm import Session
 
-def log_prediction(sensor: SensorData, result: PredictionResult, db: Session):
+
+# Backend URL to send prediction logs to (must be set in your .env file)
+BACKEND_API_URL = os.getenv("BACKEND_PREDICTION_LOG_URL")  # Example: http://backend:5000/api/predictions
+
+def log_prediction(sensor: SensorData, result: PredictionResult):
     """
-    Logs a prediction result to the database using SQLAlchemy ORM.
+    Sends the prediction result and sensor data to the backend server
+    for storage in the central database.
 
     Parameters:
-    - sensor (SensorData): The live sensor data used for prediction.
-    - result (PredictionResult): The outcome of the prediction logic.
-    - db (Session): The SQLAlchemy database session (injected from FastAPI Depends).
+    - sensor: SensorData containing type, value, timestamp
+    - result: PredictionResult containing status, suggestion, trend
 
-    This function creates a new PredictionLog database entry and commits it.
+    The backend must expose an endpoint that accepts this payload.
     """
-    log = PredictionLog(
-        timestamp=result.timestamp,
-        sensorType=sensor.sensorType,
-        value=sensor.value,
-        status=result.status,
-        suggestion=result.suggestion,
-        trendAnalysis=result.trendAnalysis
-    )
+    payload = {
+        "timestamp": result.timestamp.isoformat(),
+        "sensorType": sensor.sensorType,
+        "value": sensor.value,
+        "status": result.status,
+        "suggestion": result.suggestion,
+        "trendAnalysis": result.trendAnalysis
+    }
 
-    # Add the log to the current session and persist to database
-    db.add(log)
-    db.commit()
+    # Attempt to send log to backend
+    try:
+        response = requests.post(BACKEND_API_URL, json=payload)
+        response.raise_for_status()
+    except Exception as e:
+        print(f"[ERROR] Failed to send prediction to backend: {e}")

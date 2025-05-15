@@ -5,3 +5,4 @@ scikit-learn
 numpy
 pytest
 python-dotenv
+requests

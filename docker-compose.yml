@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  app:
+  greenhouse-ml:
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,3 +14,10 @@ services:
     environment:
       - PYTHONPATH=/app
     command: uvicorn Application.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - greenhouse-network
+      
+
+networks:
+  greenhouse-network:
+    external: true
