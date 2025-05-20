@@ -6,3 +6,6 @@ numpy
 pytest
 python-dotenv
 requests
+httpx
+apscheduler
+

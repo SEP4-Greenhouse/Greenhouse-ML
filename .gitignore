@@ -29,3 +29,7 @@ envs/
 # Windows
 Thumbs.db
 Desktop.ini
+
+
+.env
+*.tar

@@ -15,7 +15,7 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Now copy all project files
+# Now copy all project files (including model)
 COPY . .
 
 # Expose FastAPI port
