@@ -1,12 +1,11 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from Application.Api.ml_service import router as ml_router
-from Application.services.scheduler import start_scheduler
+from Application.api.ml_service import router as ml_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("[STARTUP] Starting prediction scheduler...")
-    start_scheduler()
     yield
     print("[SHUTDOWN] App is closing...")
 

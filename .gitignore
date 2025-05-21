@@ -1,35 +1,46 @@
-# Python
+# Byte-compiled / cache files
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
 *.so
 
-# Virtual environments
+# Environment and virtual environments
+.env
+.venv/
 venv/
 env/
-.venv/
-.env/
 
-# Anaconda environment folders
+# Conda
+.conda/
 *.conda
 *.ipynb_checkpoints/
 envs/
-.conda/
 .condarc
 
-# JetBrains / PyCharm
+# IDEs
 .idea/
+.vscode/
 *.iml
 
-# VS Code
-.vscode/
-
-# macOS
+# System files
 .DS_Store
-
-# Windows
 Thumbs.db
 Desktop.ini
 
-
-.env
+# Docker & large files
 *.tar
+*.log
+logs/
+
+# Optional: model files
+ml_model/model.pkl
+
+# Git
+.git
+
+# Tests (only if not included in repo)
+tests/
+
+# Ignore all model files by default
+*.pkl

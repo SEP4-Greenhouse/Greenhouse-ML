@@ -1,9 +1,33 @@
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.env
+# Ignore version control
 .git
-.idea
-.vscode
-tests/
+.gitignore
+
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+
+# Env and config
+.env
+*.env
+*.ini
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Model and logs (if not needed in image)
+*.log
+logs/
+*.tar
+
+# Notebooks (if not needed in container)
+*.ipynb
+*.ipynb_checkpoints/
