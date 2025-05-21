@@ -1,12 +1,12 @@
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split, cross_val_score, KFold
-from sklearn.metrics import mean_absolute_error, r2_score
-from sklearn.preprocessing import OneHotEncoder
+import numpy as np
 import joblib
 import os
-import numpy as np
 from datetime import datetime
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.metrics import mean_absolute_error, r2_score
 
 # === Load dataset ===
 df = pd.read_csv("Greenhouse_data_MAL.csv")
@@ -33,7 +33,7 @@ growth_stage_cols = encoder.get_feature_names_out(['GrowthStage'])
 df_encoded = pd.DataFrame(encoded_growth_stage, columns=growth_stage_cols)
 df = pd.concat([df, df_encoded], axis=1)
 
-# === Features and Target ===
+# === Feature selection ===
 features = [
     'SoilMoisture (%)',
     'AirTemperature (°C)',
@@ -48,42 +48,51 @@ target = 'TimeUntilNextWatering (hours)'
 X = df[features]
 y = df[target]
 
-# === Split dataset ===
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# === Train model ===
-model = RandomForestRegressor(n_estimators=100, random_state=42)
-model.fit(X_train, y_train)
+# === Hyperparameter Tuning ===
+param_dist = {
+    'n_estimators': [100, 150, 200, 250],
+    'max_depth': [10, 20, 30, None],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4]
+}
 
-# === Evaluate model ===
-y_pred = model.predict(X_test)
+print("🔍 Starting hyperparameter tuning...")
+search = RandomizedSearchCV(
+    RandomForestRegressor(random_state=42),
+    param_distributions=param_dist,
+    n_iter=20,
+    scoring='neg_mean_absolute_error',
+    cv=5,
+    verbose=1,
+    random_state=42,
+    n_jobs=-1
+)
+
+search.fit(X_train, y_train)
+best_model = search.best_estimator_
+print(f"✅ Best parameters found:\n{search.best_params_}")
+
+# === Final evaluation ===
+y_pred = best_model.predict(X_test)
 mae = mean_absolute_error(y_test, y_pred)
 r2 = r2_score(y_test, y_pred)
 
-print(f"\n✅ Model trained on split set")
-print(f"📊 MAE: {mae:.2f} hours")
-print(f"📈 R² Score: {r2:.2f}")
+print(f"\n📊 Final MAE: {mae:.2f} hours")
+print(f"📈 Final R² Score: {r2:.2f}")
 
-# === Cross-Validation ===
-cv = KFold(n_splits=5, shuffle=True, random_state=42)
-mae_scores = -cross_val_score(model, X, y, cv=cv, scoring='neg_mean_absolute_error')
-r2_scores = cross_val_score(model, X, y, cv=cv, scoring='r2')
-
-print("\n🔁 Cross-Validation Results (5-fold):")
-print(f"Avg MAE: {mae_scores.mean():.2f} | Std: {mae_scores.std():.2f}")
-print(f"Avg R² : {r2_scores.mean():.2f} | Std: {r2_scores.std():.2f}")
-
-# === Save model and encoder ===
+# === Save tuned model and encoder ===
 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-model_name = f"model_{timestamp}.pkl"
-encoder_name = f"growth_stage_encoder_{timestamp}.pkl"
+model_name = f"tuned_model_{timestamp}.pkl"
+encoder_name = f"tuned_encoder_{timestamp}.pkl"
 
 model_path = os.path.join(r"C:\Users\banra\college\semi 4\Sep4\Greenhouse-ML\Application\ml_model", model_name)
 encoder_path = os.path.join(r"C:\Users\banra\college\semi 4\Sep4\Greenhouse-ML\Application\ml_model", encoder_name)
 
 os.makedirs(os.path.dirname(model_path), exist_ok=True)
-joblib.dump(model, model_path)
+joblib.dump(best_model, model_path)
 joblib.dump(encoder, encoder_path)
 
-print(f"\n💾 Model saved to: {model_path}")
+print(f"\n💾 Tuned model saved to: {model_path}")
 print(f"💾 Encoder saved to: {encoder_path}")
