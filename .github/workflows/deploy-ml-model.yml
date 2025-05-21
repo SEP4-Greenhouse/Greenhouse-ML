@@ -1,0 +1,63 @@
+name: Train and Deploy Greenhouse-ML
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Application/training/**'
+      - '.github/workflows/deploy-ml-model.yml'
+
+jobs:
+  train-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # --- Checkout Code ---
+    - name: Checkout source
+      uses: actions/checkout@v3
+
+    # --- Set up Python ---
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    # --- Install dependencies ---
+    - name: Install Python dependencies
+      run: |
+        pip install -r Application/training/requirements.txt
+
+    # --- Run training pipeline ---
+    - name: Run ML training pipeline
+      run: |
+        python Application/training/training_pipeline.py
+
+    # --- Upload trained model artifacts ---
+    - name: Upload model artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: trained-model
+        path: |
+          Application/ml_model/pipeline_model_*.pkl
+          Application/ml_model/pipeline_encoder_*.pkl
+          Application/ml_model/pipeline_log_*.json
+
+    # --- Azure Login and Build + Push Docker image ---
+    - name: Log in to Azure Container Registry
+      run: |
+        echo "${{ secrets.ACR_PASSWORD }}" | docker login ${{ secrets.AZURE_CONTAINER_REGISTRY }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
+
+    - name: Build and Push Docker image
+      run: |
+        docker build -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/greenhouse-ml:latest .
+        docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/greenhouse-ml:latest
+
+    # --- Deploy to Azure Web App ---
+    - name: Restart Azure Web App with new image
+      uses: Azure/webapps-deploy@v2
+      with:
+        app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+        slot-name: production
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        images: '${{ secrets.AZURE_CONTAINER_REGISTRY }}/greenhouse-ml:latest'
