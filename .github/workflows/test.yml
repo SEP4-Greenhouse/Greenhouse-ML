@@ -33,13 +33,11 @@ jobs:
 
     - name: Run tests
       run: |
-        export PYTHONPATH=${GITHUB_WORKSPACE}
-        pytest Application/tests/
+        pytest Application/tests/ --import-mode=importlib
 
     - name: Generate test coverage
       run: |
-        export PYTHONPATH=${GITHUB_WORKSPACE}
-        pytest --cov=Application --cov-report=xml Application/tests/
+        pytest Application/tests/ --cov=Application --cov-report=xml --import-mode=importlib
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
