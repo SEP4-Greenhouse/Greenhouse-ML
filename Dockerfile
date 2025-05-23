@@ -23,8 +23,9 @@ RUN pip install --no-cache-dir --upgrade pip==24.0 setuptools==70.0.0 wheel==0.4
 
 # Pre-install heavy scientific libs to avoid rebuilding from source
 RUN pip install --no-cache-dir \
-    numpy==1.26.0 --only-binary :all: \
-    scikit-learn==1.6.1 --only-binary :all:
+    numpy==1.26.0 --only-binary=:all: \
+    scikit-learn==1.6.1 --only-binary=:all:
+
 
 
 # Copy only requirements to leverage layer caching

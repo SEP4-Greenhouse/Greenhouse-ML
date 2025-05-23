@@ -29,7 +29,9 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: greenhousemlregistry.azurecr.io/greenhouse-ml:${{ github.sha }}
+          tags: |
+            greenhousemlregistry.azurecr.io/greenhouse-ml:${{ github.sha }}
+            greenhousemlregistry.azurecr.io/greenhouse-ml:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -41,4 +43,4 @@ jobs:
         with:
           app-name: greenhousemlapp
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-          images: greenhousemlregistry.azurecr.io/greenhouse-ml:${{ github.sha }}
+          images: greenhousemlregistry.azurecr.io/greenhouse-ml:latest
