@@ -29,11 +29,12 @@ ENV/
 env.bak/
 venv.bak/
 
-# Model files and data
-Application/trained_models/*.pkl
+# Model files and data - ALLOWING PKL files to be included in git
+# Application/trained_models/*.pkl  <-- Commented out to include PKL files
 !Application/trained_models/.gitkeep
 Application/training/data/*.csv
 !Application/training/data/.gitkeep
+!Application/training/data/cleaned_data_greenhouse.csv
 
 # Testing
 .coverage
