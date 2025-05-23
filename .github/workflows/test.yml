@@ -2,9 +2,9 @@ name: Greenhouse ML CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ '*' ]  # Run on all branches when pushed
   pull_request:
-    branches: [ main, develop ]
+    branches: [ '*' ]  # Run on all PRs to any branch
 
 jobs:
   test:
