@@ -18,12 +18,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Upgrade pip and install core scientific packages first for cache efficiency
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+RUN pip install --no-cache-dir --upgrade pip==24.0 setuptools==70.0.0 wheel==0.43.0
+
 
 # Pre-install heavy scientific libs to avoid rebuilding from source
-RUN pip install --no-cache-dir --prefer-binary \
-    numpy==1.26.0 \
-    scikit-learn==1.6.1
+RUN pip install --no-cache-dir \
+    numpy==1.26.0 --only-binary :all: \
+    scikit-learn==1.6.1 --only-binary :all:
+
 
 # Copy only requirements to leverage layer caching
 COPY requirements.txt .
