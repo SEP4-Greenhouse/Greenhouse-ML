@@ -1,4 +1,3 @@
-college\semi 4\Sep4\Greenhouse-ML\README.md
 # Greenhouse ML API
 
 Machine learning service for predicting optimal watering times for greenhouse plants.
@@ -25,5 +24,5 @@ Machine learning service for predicting optimal watering times for greenhouse pl
 docker compose up
 
 # Using Python locally
-pip install -r [requirements.txt](http://_vscodecontentref_/3)
+pip install -r requirements.txt
 uvicorn Application.main:app --reload
