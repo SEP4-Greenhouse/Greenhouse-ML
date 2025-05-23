@@ -1,11 +1,18 @@
 from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel
+from datetime import datetime
 from Application.Dtos.predict import PredictionRequestDto, PredictionResultDto 
 from Application.services.ml_model_services import analyze_prediction
+
+# Create a limited response model
+class PredictionResponseDto(BaseModel):
+    timestamp: datetime
+    predictedHoursUntilWatering: float
 
 # Initialize FastAPI router with versioning
 router = APIRouter(prefix="/api/ml", tags=["ML"])
 
-@router.post("/predict", response_model=PredictionResultDto)
+@router.post("/predict", response_model=PredictionResponseDto)
 async def predict(payload: PredictionRequestDto, request: Request):
     """
     Endpoint to predict hours until the next watering is needed based on sensor readings and plant information.
@@ -15,15 +22,10 @@ async def predict(payload: PredictionRequestDto, request: Request):
         request (Request): The HTTP request object, used to extract client information.
 
     Returns:
-        PredictionResultDto: An object containing the prediction result, including the timestamp, predicted hours until watering, and model version.
+        PredictionResponseDto: An object containing only the timestamp and predicted hours until watering.
 
     Raises:
         HTTPException: If the prediction fails or an error occurs during processing.
-
-    Logs:
-        - Logs the client IP and plant growth stage for each request.
-        - Logs success or failure of the prediction process.
-        - Logs errors encountered during processing.
     """
     try:
         # Log the incoming request
@@ -42,7 +44,12 @@ async def predict(payload: PredictionRequestDto, request: Request):
             )
 
         print(f"[ML_API] Successful prediction: {result.predictedHoursUntilWatering:.2f} hours using model {getattr(result, 'modelVersion', 'unknown')}")
-        return result
+        
+        # Return only the fields we want in the response
+        return PredictionResponseDto(
+            timestamp=result.timestamp,
+            predictedHoursUntilWatering=result.predictedHoursUntilWatering
+        )
 
     except Exception as e:
         # Log the error (in production, use proper logging)
