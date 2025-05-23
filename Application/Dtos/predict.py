@@ -25,6 +25,6 @@ class PredictionRequestDto(BaseModel):
     )
 
 class PredictionResultDto(BaseModel):
-    timestamp: datetime = Field(..., example="2024-06-10T12:34:56Z")
-    predictedHoursUntilWatering: float = Field(..., example=46.1)
-    modelVersion: str = Field(..., example="2025-05-22_23-57-09")
+    timestamp: datetime = Field(..., json_schema_extra={"example": "2024-06-10T12:34:56Z"})
+    predictedHoursUntilWatering: float = Field(..., json_schema_extra={"example": 24.5})
+    modelVersion: str = Field(None, exclude=True)  # Will be excluded from JSON response

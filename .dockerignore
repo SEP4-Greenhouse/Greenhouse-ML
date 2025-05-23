@@ -48,7 +48,6 @@ data/
 *.json
 
 # Ignore ML outputs
-*.pkl
-*.joblib
-Application/trained_models/
-
+# Removed these lines to include model files inside docker image:
+# *.pkl
+# Application/trained_models/

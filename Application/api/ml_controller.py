@@ -35,13 +35,22 @@ async def predict(payload: PredictionRequestDto, request: Request):
         # Process the prediction
         result = await analyze_prediction(payload)
 
-        # Check if the prediction was successful
-        if result.predictedHoursUntilWatering < 0:
-            print(f"[ML_API] Prediction failed for plant stage: {payload.plantGrowthStage}")
-            raise HTTPException(
-                status_code=500,
-                detail="Prediction failed. Check server logs for details."
-            )
+        # Check if the prediction was successful and log model version for diagnostics
+        print(f"[ML_API] Successful prediction: {result.predictedHoursUntilWatering:.2f} hours using model {getattr(result, 'modelVersion', 'unknown')}")
+        
+        # Return only the fields we want in the response
+        return PredictionResponseDto(
+            timestamp=result.timestamp,
+            predictedHoursUntilWatering=result.predictedHoursUntilWatering
+        )
+
+    except Exception as e:
+        # Log the error (in production, use proper logging)
+        print(f"[ML_CONTROLLER] Error processing prediction: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred while processing the prediction"
+        )
 
         print(f"[ML_API] Successful prediction: {result.predictedHoursUntilWatering:.2f} hours using model {getattr(result, 'modelVersion', 'unknown')}")
         
