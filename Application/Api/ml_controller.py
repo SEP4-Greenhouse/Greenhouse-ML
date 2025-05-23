@@ -3,7 +3,7 @@ from Application.Dtos.predict import PredictionRequestDto, PredictionResultDto
 from Application.services.ml_model_services import analyze_prediction
 
 # Initialize FastAPI router with versioning
-router = APIRouter(prefix="/api/v1/ml", tags=["ML"])
+router = APIRouter(prefix="/api/ml", tags=["ML"])
 
 @router.post("/predict", response_model=PredictionResultDto)
 async def predict(payload: PredictionRequestDto, request: Request):

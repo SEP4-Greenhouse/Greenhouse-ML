@@ -44,5 +44,24 @@ htmlcov/
 .vscode/
 *.code-workspace
 
+# idea
+.idea/
+.ipynb_checkpoints
+
 # Docker
 .docker/
+
+# Logs
+*.log
+logs/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Any local configuration that might contain secrets
+config.local.yaml
+*.local.yaml
+
+# Azure deployment credentials if used locally
+.azure/

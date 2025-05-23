@@ -31,3 +31,24 @@ logs/
 # Notebooks (if not needed in container)
 *.ipynb
 *.ipynb_checkpoints/
+
+# Exclude Python test files
+tests/
+**/__tests__/
+**/test_*.py
+
+# Exclude Docker build leftovers
+*.tar
+*.gz
+*.zip
+
+# Exclude large datasets (optional)
+data/
+*.csv
+*.json
+
+# Ignore ML outputs
+*.pkl
+*.joblib
+Application/trained_models/
+
