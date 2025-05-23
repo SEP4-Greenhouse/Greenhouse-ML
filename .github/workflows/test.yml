@@ -38,10 +38,3 @@ jobs:
     - name: Generate test coverage
       run: |
         PYTHONPATH=${{ github.workspace }} pytest --cov=Application --cov-report=xml Application/tests/
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: true
