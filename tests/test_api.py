@@ -1,25 +1,37 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from fastapi.testclient import TestClient
 from Application.main import app
 from datetime import datetime, timezone
 
-
 client = TestClient(app)
 
+
 def test_api_ml_predict():
+    """Test the ML prediction API endpoint."""
+    # Prepare test payload
     payload = {
-        "current": {
-            "sensorType": "Temperature",
-            "value": 23.5,
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        },
-        "history": [
-            {"value": 22.0, "timestamp": datetime.now(timezone.utc).isoformat()},
-            {"value": 21.0, "timestamp": datetime.now(timezone.utc).isoformat()}
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "plantGrowthStage": "Vegetative Stage",  # Match exact value from training
+        "timeSinceLastWateringInHours": 6.0,
+        "mlSensorReadings": [
+            {"SensorName": "Temperature", "Unit": "°C", "Value": 24.5},
+            {"SensorName": "Soil Humidity", "Unit": "%", "Value": 40.0},
+            {"SensorName": "Air Humidity", "Unit": "%", "Value": 55.0},
+            {"SensorName": "Light", "Unit": "lux", "Value": 200.0}
         ]
     }
 
-    response = client.post("/api/ml/predict", json=payload)
+    # Send request to API
+    response = client.post("/api/v1/ml/predict", json=payload)
     assert response.status_code == 200
+
+    # Validate response structure
     data = response.json()
-    assert "status" in data
-    assert "suggestion" in data
+    assert "timestamp" in data
+    assert "predictedHoursUntilWatering" in data
+    assert "modelVersion" in data
+    assert isinstance(data["predictedHoursUntilWatering"], float)
+    assert data["predictedHoursUntilWatering"] > 0

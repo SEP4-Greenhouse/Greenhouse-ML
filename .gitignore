@@ -1,46 +1,48 @@
-# Byte-compiled / cache files
+# Python
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
+*$py.class
 *.so
-
-# Environment and virtual environments
-.env
-.venv/
-venv/
+.Python
 env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Conda
-.conda/
-*.conda
-*.ipynb_checkpoints/
-envs/
-.condarc
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-# IDEs
-.idea/
+# Model files and data
+Application/trained_models/*.pkl
+!Application/trained_models/.gitkeep
+Application/training/data/*.csv
+!Application/training/data/.gitkeep
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# VS Code
 .vscode/
-*.iml
+*.code-workspace
 
-# System files
-.DS_Store
-Thumbs.db
-Desktop.ini
-
-# Docker & large files
-*.tar
-*.log
-logs/
-
-# Optional: model files
-ml_model/model.pkl
-
-# Git
-.git
-
-# Tests (only if not included in repo)
-tests/
-
-# Ignore all model files by default
-*.pkl
+# Docker
+.docker/

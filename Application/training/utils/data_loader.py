@@ -1,42 +1,60 @@
-# === data_loader.py ===
-from Application.training.utils.imports import *
+import pandas as pd
+import os
 
-DATA_PATH = os.path.join("Application","training", "data", "greenhouse_data_mal.csv")
+DATA_PATH = os.path.join("Application", "training", "data", "cleaned_data_greenhouse.csv")
 
 def load_dataset():
-    """Load greenhouse dataset from CSV."""
-    return pd.read_csv(DATA_PATH)
-
+    """Load the raw dataset without any processing."""
+    df = pd.read_csv(DATA_PATH) 
+    df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+    df.columns = df.columns.str.strip()
+    return df
 
 def load_processed_dataset(encoder=None):
+    """
+    Load and process the dataset for model training.
+    
+    Args:
+        encoder: Optional one-hot encoder for categorical variables
+        
+    Returns:
+        X: Features DataFrame
+        y: Target Series
+        df: Complete DataFrame with engineered features
+        features: List of feature names
+    """
+    # Load and clean data
     df = pd.read_csv(DATA_PATH)
+    df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+    df.columns = df.columns.str.strip()
 
-    # Derived features
-    df['TimeUntilNextWatering (hours)'] = df['TimeSinceLastWatering (hours)'].max() - df['TimeSinceLastWatering (hours)']
-    df['is_daytime'] = df['HourOfDay'].apply(lambda h: 1 if 6 <= h <= 18 else 0)
-    df['moisture_drop_rate'] = df['SoilMoisture (%)'].diff().fillna(0) * -1
+    # Create engineered features
+    df["is_daytime"] = df["hourOfDay"].apply(lambda h: 1 if 6 <= h <= 18 else 0)
+    
+    # Set target variable
+    y = df["timeUntilNextWateringInHours"]
 
-    # Encode GrowthStage
+    # Process categorical features if encoder is provided
     if encoder is not None:
-        encoded = encoder.transform(df[['GrowthStage']])
-        growth_stage_cols = encoder.get_feature_names_out(['GrowthStage'])
-        df = pd.concat([df, pd.DataFrame(encoded, columns=growth_stage_cols)], axis=1)
+        encoded = encoder.fit_transform(df[["plantGrowthStage"]])
+        stage_cols = encoder.get_feature_names_out(["plantGrowthStage"])
+        df_encoded = pd.DataFrame(encoded, columns=stage_cols, index=df.index)
+        df = pd.concat([df, df_encoded], axis=1)
     else:
-        growth_stage_cols = []
+        stage_cols = []
 
-    # Define features
+    # Define features used for modeling
     base_features = [
-        'SoilMoisture (%)',
-        'AirTemperature (°C)',
-        'AirHumidity (%)',
-        'LightLevel (lux)',
-        'HourOfDay',
-        'is_daytime',
-        'moisture_drop_rate',
+        "Temperature",
+        "Soil Humidity",
+        "Air Humidity",
+        "Light",
+        "hourOfDay",
+        "is_daytime",
+        "timeSinceLastWateringInHours",
     ]
-    features = base_features + list(growth_stage_cols)
+    features = base_features + list(stage_cols)
 
+    # Extract features
     X = df[features]
-    y = df['TimeUntilNextWatering (hours)']
-
     return X, y, df, features

@@ -2,21 +2,16 @@ version: '3.8'
 
 services:
   greenhouse-ml:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: greenhouse-ml
+    build: .
+    container_name: greenhouse-ml
     ports:
       - "8000:8000"
     volumes:
-      - .:/app  # Live code reloading
-    container_name: greenhouse-ml
-    environment:
-      - PYTHONPATH=/app
-    command: uvicorn Application.main:app --host 0.0.0.0 --port 8000 --reload
-    networks:
-      - greenhouse-network
-
-networks:
-  greenhouse-network:
-    external: true
+      - ./Application/trained_models:/app/Application/trained_models
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

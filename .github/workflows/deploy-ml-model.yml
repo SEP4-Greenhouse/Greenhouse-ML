@@ -1,4 +1,4 @@
-name: Train and Deploy Greenhouse-ML
+name: Train, Tune and Deploy Greenhouse-ML
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - '.github/workflows/deploy-ml-model.yml'
 
 jobs:
-  train-and-deploy:
+  train-tune-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,22 +26,33 @@ jobs:
     # --- Install dependencies ---
     - name: Install Python dependencies
       run: |
+        pip install --upgrade pip
         pip install -r Application/training/requirements.txt
 
     # --- Run training pipeline ---
-    - name: Run ML training pipeline
+    - name: Train base ML model
       run: |
-        python Application/training/training_pipeline.py
+        python Application/training/training_models/train_randomForest.py
+
+    # --- Run hyperparameter tuning ---
+    - name: Tune ML model
+      run: |
+        python Application/training/training_models/tune_randomForest.py
+        
+    # --- Create visualizations ---
+    - name: Generate model visualizations
+      run: |
+        python Application/training/training_models/Visual_randomForest.py
 
     # --- Upload trained model artifacts ---
-    - name: Upload model artifacts
+    - name: Upload tuned model artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: trained-model
+        name: tuned-model
         path: |
-          Application/ml_model/pipeline_model_*.pkl
-          Application/ml_model/pipeline_encoder_*.pkl
-          Application/ml_model/pipeline_log_*.json
+          Application/trained_models/reg_model_*.pkl
+          Application/trained_models/reg_encoder_*.pkl
+          Application/trained_models/logs/*.json
 
     # --- Azure Login and Build + Push Docker image ---
     - name: Log in to Azure Container Registry

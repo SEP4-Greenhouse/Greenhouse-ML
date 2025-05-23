@@ -1,0 +1,38 @@
+{
+    "timestamp": "2025-05-23_02-27-37",
+    "regressor_path": "Application\\trained_models\\reg_model_2025-05-23_02-27-37.pkl",
+    "encoder_path": "Application\\trained_models\\reg_encoder_2025-05-23_02-27-37.pkl",
+    "best_params": {
+        "n_estimators": 50,
+        "min_samples_split": 2,
+        "min_samples_leaf": 1,
+        "max_features": 0.5,
+        "max_depth": 10
+    },
+    "regression_mae": 2.553,
+    "regression_r2": 0.977,
+    "features_used": [
+        "Temperature",
+        "Soil Humidity",
+        "Air Humidity",
+        "Light",
+        "hourOfDay",
+        "is_daytime",
+        "timeSinceLastWateringInHours",
+        "plantGrowthStage_Flowering Stage",
+        "plantGrowthStage_Fruiting",
+        "plantGrowthStage_Germination",
+        "plantGrowthStage_Seed Stage",
+        "plantGrowthStage_Seedling Stage",
+        "plantGrowthStage_Vegetative Stage",
+        "soil_dryness_index",
+        "temp_soil_product",
+        "light_humidity_ratio",
+        "plantGrowthStage_Flowering Stage",
+        "plantGrowthStage_Fruiting",
+        "plantGrowthStage_Germination",
+        "plantGrowthStage_Seed Stage",
+        "plantGrowthStage_Seedling Stage",
+        "plantGrowthStage_Vegetative Stage"
+    ]
+}
