@@ -1,4 +1,4 @@
-name: Train, Tune and Deploy Greenhouse-ML
+name: deploy-ml-model
 
 on:
   push:
