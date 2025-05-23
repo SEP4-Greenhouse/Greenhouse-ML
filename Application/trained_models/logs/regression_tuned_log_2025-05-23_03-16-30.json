@@ -1,7 +1,7 @@
 {
-    "timestamp": "2025-05-23_02-27-37",
-    "regressor_path": "Application\\trained_models\\reg_model_2025-05-23_02-27-37.pkl",
-    "encoder_path": "Application\\trained_models\\reg_encoder_2025-05-23_02-27-37.pkl",
+    "timestamp": "2025-05-23_03-16-30",
+    "regressor_path": "Application\\trained_models\\reg_model_2025-05-23_03-16-30.pkl",
+    "encoder_path": "Application\\trained_models\\reg_encoder_2025-05-23_03-16-30.pkl",
     "best_params": {
         "n_estimators": 50,
         "min_samples_split": 2,
