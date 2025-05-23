@@ -4,9 +4,7 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'Application/trained_models/**'
-      - '.github/workflows/deploy-ml-model.yml'
+    
 
 jobs:
   deploy-only:
