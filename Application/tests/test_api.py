@@ -25,7 +25,7 @@ def test_api_ml_predict():
     }
 
     # Send request to API
-    response = client.post("/api/v1/ml/predict", json=payload)
+    response = client.post("/api/ml/predict", json=payload)
     assert response.status_code == 200
 
     # Validate response structure

@@ -25,7 +25,7 @@ async def test_temperature_warning():
     )
     result = await analyze_prediction(payload)
     assert isinstance(result.predictedHoursUntilWatering, float)
-    assert result.predictedHoursUntilWatering >= 0
+    assert result.predictedHoursUntilWatering > 0
     assert hasattr(result, "modelVersion")
 
 
@@ -127,5 +127,6 @@ async def test_model_loading_error():
             ]
         )
         result = await analyze_prediction(payload)
-        # Should return error indicator
-        assert result.predictedHoursUntilWatering < 0
+        # Should use fallback model
+        assert result.predictedHoursUntilWatering > 0  # Changed from < 0
+        assert "fallback" in result.modelVersion.lower()  # Check that it used fallback
