@@ -13,62 +13,56 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # --- Checkout Code ---
-    - name: Checkout source
-      uses: actions/checkout@v3
+      - name: Checkout source
+        uses: actions/checkout@v3
 
-    # --- Set up Python ---
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
 
-    # --- Install dependencies ---
-    - name: Install Python dependencies
-      run: |
-        pip install --upgrade pip
-        pip install -r Application/training/requirements.txt
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r Application/training/requirements.txt
 
-    # --- Run training pipeline ---
-    - name: Train base ML model
-      run: |
-        python Application/training/training_models/train_randomForest.py
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
-    # --- Run hyperparameter tuning ---
-    - name: Tune ML model
-      run: |
-        python Application/training/training_models/tune_randomForest.py
-        
-    # --- Create visualizations ---
-    - name: Generate model visualizations
-      run: |
-        python Application/training/training_models/Visual_randomForest.py
+      - name: Train base ML model
+        run: |
+          python Application/training/training_models/train_randomForest.py
 
-    # --- Upload trained model artifacts ---
-    - name: Upload tuned model artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: tuned-model
-        path: |
-          Application/trained_models/reg_model_*.pkl
-          Application/trained_models/reg_encoder_*.pkl
-          Application/trained_models/logs/*.json
+      - name: Tune ML model
+        run: |
+          python Application/training/training_models/tune_randomForest.py
 
-    # --- Azure Login and Build + Push Docker image ---
-    - name: Log in to Azure Container Registry
-      run: |
-        echo "${{ secrets.ACR_PASSWORD }}" | docker login ${{ secrets.AZURE_CONTAINER_REGISTRY }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
+      - name: Generate model visualizations
+        run: |
+          python Application/training/training_models/Visual_randomForest.py
 
-    - name: Build and Push Docker image
-      run: |
-        docker build -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/greenhouse-ml:latest .
-        docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/greenhouse-ml:latest
+      - name: Upload tuned model artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: tuned-model
+          path: |
+            Application/trained_models/reg_model_*.pkl
+            Application/trained_models/reg_encoder_*.pkl
+            Application/trained_models/logs/*.json
 
-    # --- Deploy to Azure Web App ---
-    - name: Restart Azure Web App with new image
-      uses: Azure/webapps-deploy@v2
-      with:
-        app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-        slot-name: production
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        images: '${{ secrets.AZURE_CONTAINER_REGISTRY }}/greenhouse-ml:latest'
+      - name: Log in to Azure Container Registry
+        run: |
+          echo "${{ secrets.ACR_PASSWORD }}" | docker login ${{ secrets.AZURE_CONTAINER_REGISTRY }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
+
+      - name: Build and Push Docker image
+        run: |
+          docker build -t ${{ secrets.AZURE_CONTAINER_REGISTRY }}/greenhouse-ml:latest .
+          docker push ${{ secrets.AZURE_CONTAINER_REGISTRY }}/greenhouse-ml:latest
+
+      - name: Restart Azure Web App with new image
+        uses: Azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          slot-name: production
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          images: '${{ secrets.AZURE_CONTAINER_REGISTRY }}/greenhouse-ml:latest'
