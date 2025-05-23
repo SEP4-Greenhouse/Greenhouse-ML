@@ -11,7 +11,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout source
       uses: actions/checkout@v3
@@ -27,22 +27,19 @@ jobs:
         pip install -r requirements.txt
         pip install flake8 pytest pytest-cov
 
-    - name: Check directory structure
-      run: |
-        echo "Current directory structure:"
-        find . -type f -name "*.py" | sort
-
     - name: Run linting
       run: |
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
     - name: Run tests
       run: |
-        PYTHONPATH=$PWD pytest Application/tests/
+        export PYTHONPATH=${GITHUB_WORKSPACE}
+        pytest Application/tests/
 
     - name: Generate test coverage
       run: |
-        PYTHONPATH=$PWD pytest Application/tests/ --cov=Application --cov-report=xml
+        export PYTHONPATH=${GITHUB_WORKSPACE}
+        pytest --cov=Application --cov-report=xml Application/tests/
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
