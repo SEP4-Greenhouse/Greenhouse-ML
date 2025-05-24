@@ -40,11 +40,9 @@ async def analyze_prediction(payload: PredictionRequestDto) -> PredictionResultD
         # Make prediction
         try:
             prediction = model.predict([features])[0]
-            model_version = os.path.basename(model_path).replace("reg_model_", "").replace(".pkl", "")
             return PredictionResultDto(
-                predictionTime=datetime.utcnow(),
-                hoursUntilNextWatering=float(prediction),
-                modelVersion=model_version
+                PredictionTime=datetime.utcnow(),
+                HoursUntilNextWatering=float(prediction)
             )
         except Exception as e:
             print(f"[ML_MODEL] Prediction failed: {str(e)}")
@@ -99,11 +97,9 @@ def create_fallback_model_prediction(payload: PredictionRequestDto, model_path: 
         hours *= 0.9
     elif payload.plantGrowthStage in ["Flowering", "Flowering Stage"]:
         hours *= 1.1
-    model_version = os.path.basename(model_path).replace("reg_model_", "").replace(".pkl", "")
     return PredictionResultDto(
-        predictionTime=datetime.utcnow(),
-        hoursUntilNextWatering=float(hours),
-        modelVersion=f"fallback_{model_version}"
+        PredictionTime=datetime.utcnow(),
+        HoursUntilNextWatering=float(hours)
     )
 
 def create_fallback_prediction(payload: PredictionRequestDto, reason: str) -> PredictionResultDto:
@@ -147,7 +143,6 @@ def create_fallback_prediction(payload: PredictionRequestDto, reason: str) -> Pr
             hours *= 0.8
     hours = max(min(hours, 72.0), 1.0)
     return PredictionResultDto(
-        predictionTime=datetime.utcnow(),
-        hoursUntilNextWatering=float(hours),
-        modelVersion=f"fallback_{reason}"
+        PredictionTime=datetime.utcnow(),
+        HoursUntilNextWatering=float(hours)
     )

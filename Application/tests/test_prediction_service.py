@@ -7,7 +7,6 @@ from datetime import datetime, timezone
 from Application.Dtos.predict import SensorReadingDto, PredictionRequestDto
 from Application.services.ml_model_services import analyze_prediction
 
-
 @pytest.mark.asyncio
 async def test_analyze_prediction_simple():
     """Test the prediction service with simple input values."""
@@ -29,7 +28,7 @@ async def test_analyze_prediction_simple():
 
     # Verify the result
     assert result is not None
-    assert isinstance(result.predictedHoursUntilWatering, float)
-    assert result.predictedHoursUntilWatering >= 0
+    assert isinstance(result.HoursUntilNextWatering, float)
+    assert result.HoursUntilNextWatering >= 0
     assert hasattr(result, "modelVersion")
     assert len(result.modelVersion) > 0

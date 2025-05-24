@@ -2,13 +2,11 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-
 from fastapi.testclient import TestClient
 from Application.main import app
 from datetime import datetime, timezone
 
 client = TestClient(app)
-
 
 def test_api_ml_predict():
     """Test the ML prediction API endpoint."""
@@ -28,7 +26,7 @@ def test_api_ml_predict():
     assert response.status_code == 200
 
     data = response.json()
-    assert "timestamp" in data
-    assert "predictedHoursUntilWatering" in data
-    assert isinstance(data["predictedHoursUntilWatering"], float)
-    assert data["predictedHoursUntilWatering"] > 0
+    assert "PredictionTime" in data
+    assert "HoursUntilNextWatering" in data
+    assert isinstance(data["HoursUntilNextWatering"], float)
+    assert data["HoursUntilNextWatering"] > 0

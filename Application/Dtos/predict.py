@@ -25,9 +25,8 @@ class PredictionRequestDto(BaseModel):
     )
 
 class PredictionResultDto(BaseModel):
-    predictionTime: datetime = Field(..., alias="predictionTime")
-    hoursUntilNextWatering: float = Field(..., alias="hoursUntilNextWatering")
-    modelVersion: str = Field(None, exclude=True)
+    PredictionTime: datetime = Field(..., alias="PredictionTime")
+    HoursUntilNextWatering: float = Field(..., alias="HoursUntilNextWatering")
 
     class Config:
         allow_population_by_field_name = True

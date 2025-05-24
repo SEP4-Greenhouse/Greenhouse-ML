@@ -7,14 +7,12 @@ from datetime import datetime, timezone
 from Application.Dtos.predict import SensorReadingDto, PredictionRequestDto
 from Application.services.ml_model_services import analyze_prediction
 
-
 @pytest.mark.asyncio
 async def test_analyze_prediction_logic():
     """Test that the ML prediction logic produces valid results."""
-    # Prepare test payload
     payload = PredictionRequestDto(
         timestamp=datetime.now(timezone.utc),
-        plantGrowthStage="Vegetative Stage",  # Match exact value from training
+        plantGrowthStage="Vegetative Stage",
         timeSinceLastWateringInHours=5.0,
         mlSensorReadings=[
             SensorReadingDto(SensorName="Soil Humidity", Unit="%", Value=30),
@@ -24,12 +22,10 @@ async def test_analyze_prediction_logic():
         ]
     )
 
-    # Call prediction function
     result = await analyze_prediction(payload)
 
-    # Validate prediction result
     assert result is not None
-    assert hasattr(result, "predictedHoursUntilWatering")
-    assert hasattr(result, "modelVersion")
-    assert isinstance(result.predictedHoursUntilWatering, float)
-    assert result.predictedHoursUntilWatering >= 0  # prediction should be non-negative
+    assert hasattr(result, "HoursUntilNextWatering")
+    assert hasattr(result, "PredictionTime")
+    assert isinstance(result.HoursUntilNextWatering, float)
+    assert result.HoursUntilNextWatering >= 0
