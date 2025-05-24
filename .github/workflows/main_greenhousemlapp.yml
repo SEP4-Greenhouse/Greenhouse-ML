@@ -13,6 +13,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies for model training
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy==1.26.0 scikit-learn==1.6.1 joblib pandas matplotlib
+
+      - name: Train ML model using existing training code
+        run: |
+          mkdir -p Application/trained_models
+          # Run your existing training script
+          python -m Application.training.train_model
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 

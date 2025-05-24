@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 import pytest
 from datetime import datetime, timezone
@@ -30,5 +30,4 @@ async def test_analyze_prediction_simple():
     assert result is not None
     assert isinstance(result.HoursUntilNextWatering, float)
     assert result.HoursUntilNextWatering >= 0
-    # Remove or comment out the line checking for modelVersion
-    # assert hasattr(result, "modelVersion")
+    # Removed: assert hasattr(result, "modelVersion")

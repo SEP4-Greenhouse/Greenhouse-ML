@@ -30,3 +30,4 @@ def test_api_ml_predict():
     assert "HoursUntilNextWatering" in data
     assert isinstance(data["HoursUntilNextWatering"], float)
     assert data["HoursUntilNextWatering"] > 0
+    # No modelVersion check
