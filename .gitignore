@@ -66,3 +66,7 @@ config.local.yaml
 
 # Azure deployment credentials if used locally
 .azure/
+
+#exclude model files from docker image
+Application/trained_models/*.pkl
+Application/trained_models/logs/*.json
