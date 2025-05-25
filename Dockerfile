@@ -5,7 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PIP_NO_CACHE_DIR=1
 ENV PYTHONHASHSEED=random
-ENV PYTHONPATH=/app  # 👈 Ensures modules are importable
+ENV PYTHONPATH=/app
 
 # === System dependencies ===
 RUN apt-get update && apt-get install -y --no-install-recommends \
