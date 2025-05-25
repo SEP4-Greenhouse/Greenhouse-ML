@@ -25,9 +25,9 @@ jobs:
 
       - name: Train ML model using existing training code
         run: |
+          export PYTHONPATH=.
           mkdir -p Application/trained_models
-          # Run your existing training script
-          python -m Application.training.train_model
+          python Application/training/training_models/train_randomForest.py
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2

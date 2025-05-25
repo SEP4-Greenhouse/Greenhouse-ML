@@ -1,12 +1,10 @@
 FROM python:3.12-slim
 
-# Set environment variables to reduce image size and improve performance
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PIP_NO_CACHE_DIR=1
 ENV PYTHONHASHSEED=random
 
-# Install build dependencies for numpy and pandas (slim doesn't include these)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
@@ -17,26 +15,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Upgrade pip and install core scientific packages first for cache efficiency
-RUN pip install --no-cache-dir --upgrade pip==24.0 setuptools==70.0.0 wheel==0.43.0
-
-# Pre-install heavy scientific libs to avoid rebuilding from source
-# Using EXACTLY the same versions as in your main Dockerfile
-RUN pip install --no-cache-dir \
-    numpy==1.26.0 --only-binary=:all: \
-    scikit-learn==1.6.1 --only-binary=:all:
-
-# Copy only requirements to leverage layer caching
 COPY requirements.txt .
 
-# Install remaining project-specific dependencies
-RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
+RUN pip install --upgrade pip setuptools wheel
 
-# Create directories for models and data
-RUN mkdir -p Application/trained_models Application/data
+# 🔥 Install critical libs from binary wheels
+RUN pip install --prefer-binary --no-cache-dir \
+    numpy==1.26.0 \
+    pandas==2.2.2 \
+    scikit-learn==1.6.1 \
+    matplotlib \
+    joblib
 
-# Now copy the full source code
+# Optional: other app-specific deps
+RUN pip install --no-cache-dir -r requirements.txt || true
+
 COPY . .
 
-# Default command runs the training script
-CMD ["uvicorn", "Application.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+EXPOSE 8000
+
+CMD ["uvicorn", "Application.main:app", "--host", "0.0.0.0", "--port", "8000"]
