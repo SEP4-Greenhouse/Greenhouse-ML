@@ -3,7 +3,7 @@ import glob
 import traceback
 import joblib
 import pickle
-from datetime import datetime
+from datetime import datetime, timezone
 from Application.Dtos.predict import PredictionRequestDto, PredictionResultDto
 
 # Constants
@@ -41,8 +41,9 @@ async def analyze_prediction(payload: PredictionRequestDto) -> PredictionResultD
                     prediction = model.predict([features])[0]
                     print(f"[ML_API] Successful prediction: {prediction:.2f} hours using pickle_compatible_{model_version}")
                     return PredictionResultDto(
-                        PredictionTime=datetime.utcnow(),
-                        HoursUntilNextWatering=float(prediction)
+                        PredictionTime=datetime.now(timezone.utc),  # Updated to use timezone-aware datetime
+                        HoursUntilNextWatering=float(prediction),
+                        modelVersion=f"pickle_compatible_{model_version}"
                     )
                 except Exception as pickle_error:
                     print(f"[ML_MODEL] Alternate loading also failed: {str(pickle_error)}")
@@ -65,8 +66,9 @@ async def analyze_prediction(payload: PredictionRequestDto) -> PredictionResultD
             prediction = model.predict([features])[0]
             print(f"[ML_API] Successful prediction: {prediction:.2f} hours using model {model_version}")
             return PredictionResultDto(
-                PredictionTime=datetime.utcnow(),
-                HoursUntilNextWatering=float(prediction)
+                PredictionTime=datetime.now(timezone.utc),  # Updated to use timezone-aware datetime
+                HoursUntilNextWatering=float(prediction),
+                modelVersion=model_version
             )
         except Exception as e:
             print(f"[ML_MODEL] Prediction failed: {str(e)}")
@@ -165,8 +167,9 @@ def create_fallback_model_prediction(payload: PredictionRequestDto, model_path: 
     print(f"[ML_API] Fallback prediction: {hours:.2f} hours (fallback_{model_name})")
     
     return PredictionResultDto(
-        PredictionTime=datetime.utcnow(),
-        HoursUntilNextWatering=float(hours)
+        PredictionTime=datetime.now(timezone.utc),  # Updated to use timezone-aware datetime
+        HoursUntilNextWatering=float(hours),
+        modelVersion=f"fallback_{model_name}"
     )
 
 def create_fallback_prediction(payload: PredictionRequestDto, reason: str) -> PredictionResultDto:
@@ -213,6 +216,7 @@ def create_fallback_prediction(payload: PredictionRequestDto, reason: str) -> Pr
     print(f"[ML_API] Fallback prediction: {hours:.2f} hours (fallback_{reason})")
     
     return PredictionResultDto(
-        PredictionTime=datetime.utcnow(),
-        HoursUntilNextWatering=float(hours)
+        PredictionTime=datetime.now(timezone.utc),  # Updated to use timezone-aware datetime
+        HoursUntilNextWatering=float(hours),
+        modelVersion=f"fallback_{reason}"
     )

@@ -1,7 +1,11 @@
 from fastapi import APIRouter, HTTPException, Request
+import logging
 from datetime import datetime
 from Application.Dtos.predict import PredictionRequestDto, PredictionResponseDto
 from Application.services.ml_model_services import analyze_prediction
+
+# Set up proper logging
+logger = logging.getLogger(__name__)
 
 # Initialize FastAPI router with versioning
 router = APIRouter(prefix="/api/ml", tags=["ML"])
@@ -24,13 +28,13 @@ async def predict(payload: PredictionRequestDto, request: Request):
     try:
         # Log the incoming request
         client_ip = request.client.host if request.client else "unknown"
-        print(f"[ML_API] Received prediction request from {client_ip} for plant stage: {payload.plantGrowthStage}")
+        logger.info(f"Received prediction request from {client_ip} for plant stage: {payload.plantGrowthStage}")
 
         # Process the prediction
         result = await analyze_prediction(payload)
 
         # Check if the prediction was successful and log model version for diagnostics
-        print(f"[ML_API] Successful prediction: {result.HoursUntilNextWatering:.2f} hours using model {getattr(result, 'modelVersion', 'unknown')}")
+        logger.info(f"Successful prediction: {result.HoursUntilNextWatering:.2f} hours using model {getattr(result, 'modelVersion', 'unknown')}")
         
         # Return response with proper field names matching C# conventions
         return PredictionResponseDto(
@@ -39,8 +43,8 @@ async def predict(payload: PredictionRequestDto, request: Request):
         )
 
     except Exception as e:
-        # Log the error (in production, use proper logging)
-        print(f"[ML_CONTROLLER] Error processing prediction: {str(e)}")
+        # Log the error properly
+        logger.error(f"Error processing prediction: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail="An error occurred while processing the prediction"

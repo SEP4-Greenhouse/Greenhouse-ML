@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 class SensorReadingDto(BaseModel):
     SensorName: str
@@ -29,15 +29,13 @@ class PredictionRequestDto(BaseModel):
 class PredictionResultDto(BaseModel):
     PredictionTime: datetime
     HoursUntilNextWatering: float
-    modelVersion: str = Field(None, exclude=True)  # This field won't be included in JSON responses
+    modelVersion: Optional[str] = Field(None, exclude=True)  
     
-    class Config:
-        populate_by_name = True  # Updated from allow_population_by_field_name for Pydantic v2
+    model_config = ConfigDict(populate_by_name=True)  
 
 class PredictionResponseDto(BaseModel):
     """DTO for API responses - matching C# naming exactly"""
     PredictionTime: datetime = Field(..., json_schema_extra={"example": "2024-06-10T12:34:56Z"})
     HoursUntilNextWatering: float = Field(..., json_schema_extra={"example": 24.5})
     
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True) 

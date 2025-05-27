@@ -10,13 +10,13 @@ from fastapi.middleware.cors import CORSMiddleware
 async def lifespan(app: FastAPI):
     # Call model availability check during startup
     check_model_availability()
-    print("✅ [STARTUP] Prediction service is starting...")
+    print("[STARTUP] Prediction service is starting...")
     yield
-    print("🛑 [SHUTDOWN] App is shutting down...")
+    print("[SHUTDOWN] App is shutting down...")
 
 app = FastAPI(
     title="Greenhouse ML API",
-    description="🚀 Predict optimal watering time based on sensor data",
+    description="Predict optimal watering time based on sensor data",
     version="1.0.0",
     lifespan=lifespan
 )

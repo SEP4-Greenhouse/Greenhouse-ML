@@ -21,7 +21,7 @@ def save_model(model, encoder, timestamp=None, prefix="pipeline_"):
 
     Args:
         model: Trained ML model
-        encoder: One-hot encoder for categorical variables
+        encoder: One-hot encoder for categorical variables (can be None)
         timestamp: Timestamp string for file naming (if None, generates new timestamp)
         prefix: Filename prefix (default: 'pipeline_')
 
@@ -32,11 +32,15 @@ def save_model(model, encoder, timestamp=None, prefix="pipeline_"):
         timestamp = get_timestamp()
 
     model_path = os.path.join(MODEL_DIR, f"{prefix}model_{timestamp}.pkl")
-    encoder_path = os.path.join(MODEL_DIR, f"{prefix}encoder_{timestamp}.pkl")
     joblib.dump(model, model_path)
-    joblib.dump(encoder, encoder_path)
     print(f"Model saved to: {model_path}")
-    print(f"Encoder saved to: {encoder_path}")
+    
+    encoder_path = None
+    if encoder is not None:
+        encoder_path = os.path.join(MODEL_DIR, f"{prefix}encoder_{timestamp}.pkl")
+        joblib.dump(encoder, encoder_path)
+        print(f"Encoder saved to: {encoder_path}")
+        
     return model_path, encoder_path
 
 def save_log(log_data, timestamp=None, prefix="pipeline_"):
@@ -71,8 +75,11 @@ def cleanup_old_files(folder, pattern, keep_last=3):
     """
     files = sorted(glob.glob(os.path.join(folder, pattern)), key=os.path.getmtime, reverse=True)
     for file in files[keep_last:]:
-        os.remove(file)
-        print(f"Deleted: {file}")
+        try:
+            os.remove(file)
+            print(f"Deleted: {file}")
+        except OSError as e:
+            print(f"Error deleting {file}: {e}")
 
 def load_latest_model(model_prefix="reg_model_"):
     """
@@ -95,15 +102,17 @@ def load_latest_model(model_prefix="reg_model_"):
     encoder_pattern = os.path.join(MODEL_DIR, f"{encoder_prefix}*.pkl")
     encoder_files = sorted(glob.glob(encoder_pattern), key=os.path.getmtime, reverse=True)
 
-    if not encoder_files:
-        raise FileNotFoundError(f"No encoder files found matching {encoder_pattern}")
-
-    encoder_path = encoder_files[0]
-
     model = joblib.load(model_path)
-    encoder = joblib.load(encoder_path)
     print(f"Loaded model: {model_path}")
-    print(f"Loaded encoder: {encoder_path}")
+    
+    encoder = None
+    encoder_path = None
+    if encoder_files:
+        encoder_path = encoder_files[0]
+        encoder = joblib.load(encoder_path)
+        print(f"Loaded encoder: {encoder_path}")
+    else:
+        print("No encoder found, continuing with None")
 
     return model, encoder, model_path, encoder_path
 

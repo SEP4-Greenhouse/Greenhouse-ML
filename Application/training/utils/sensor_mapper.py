@@ -1,5 +1,6 @@
 from datetime import datetime
 import numpy as np
+import traceback
 
 # Define constants for feature names - updated to match training data
 CORE_SENSORS = ["Soil Humidity", "Temperature", "Air Humidity", "Light"]
@@ -13,7 +14,16 @@ ENGINEERED_FEATURES = [
 TRAINING_FEATURES = CORE_SENSORS + ENGINEERED_FEATURES  # Will add one-hot encoded features dynamically
 
 def map_backend_readings_to_features(data: dict, encoder=None):
-    """Maps API/backend data format to the format expected by the ML model."""
+    """
+    Maps API/backend data format to the format expected by the ML model.
+    
+    Args:
+        data: Dictionary containing sensor readings and metadata
+        encoder: Optional one-hot encoder for categorical variables
+        
+    Returns:
+        tuple: (features_list, feature_names_list)
+    """
     try:
         # Extract sensor readings from JSON format
         sensor_readings = {}
@@ -34,22 +44,23 @@ def map_backend_readings_to_features(data: dict, encoder=None):
             hour_of_day = timestamp.hour
             is_daytime = 1.0 if 6 <= hour_of_day < 20 else 0.0
             
-        except Exception:
+        except Exception as e:
+            print(f"Error parsing timestamp: {e}")
             timestamp = datetime.now()
             hour_of_day = timestamp.hour
             is_daytime = 1.0
         
-        # Extract core sensor readings
-        temperature = sensor_readings.get("Temperature", 0.0)
-        soil_humidity = sensor_readings.get("Soil Humidity", 0.0)
-        air_humidity = sensor_readings.get("Air Humidity", 0.0)
-        light = sensor_readings.get("Light", 0.0)
+        # Extract core sensor readings with reasonable defaults
+        temperature = sensor_readings.get("Temperature", 25.0)  # Default room temperature
+        soil_humidity = sensor_readings.get("Soil Humidity", 50.0)  # Middle value
+        air_humidity = sensor_readings.get("Air Humidity", 50.0)  # Middle value
+        light = sensor_readings.get("Light", 200.0)  # Moderate light level
         
         # Get plant growth stage
         plant_stage = data.get("plantGrowthStage", "Unknown")
         
         # Get time since last watering
-        time_since_last_watering = float(data.get("timeSinceLastWateringInHours", 0.0))
+        time_since_last_watering = float(data.get("timeSinceLastWateringInHours", 24.0))  # Default 1 day
         
         # Create engineered features
         soil_dryness_index = 100.0 - soil_humidity
@@ -75,7 +86,8 @@ def map_backend_readings_to_features(data: dict, encoder=None):
                     
                 stage_feature_names = list(encoder.get_feature_names_out(["plantGrowthStage"]))
                 stage_features = list(stage_vector)
-            except Exception:
+            except Exception as e:
+                print(f"Error encoding plant stage: {e}")
                 stage_features = []
                 stage_feature_names = []
         
@@ -102,17 +114,21 @@ def map_backend_readings_to_features(data: dict, encoder=None):
         
         return features, feature_names
         
-    except Exception:
+    except Exception as e:
+        print(f"Error in mapping features: {e}")
+        print(traceback.format_exc())
+        
         # Return a safe fallback with empty features
-        dummy_core = [0.0] * len(CORE_SENSORS)
-        dummy_engineered = [0.0] * len(ENGINEERED_FEATURES)
+        dummy_core = [50.0, 25.0, 50.0, 200.0]  # More reasonable defaults for core sensors
+        dummy_engineered = [50.0, 12.5, 4.0, 12.0, 1.0]  # Reasonable defaults for engineered features
         dummy_categorical = []
         
         if encoder is not None:
             try:
                 dummy_categorical = [0.0] * len(encoder.get_feature_names_out(["plantGrowthStage"]))
                 stage_feature_names = list(encoder.get_feature_names_out(["plantGrowthStage"]))
-            except:
+            except Exception as e:
+                print(f"Error creating dummy categorical features: {e}")
                 dummy_categorical = [0.0]
                 stage_feature_names = ["plantGrowthStage_Unknown"]
         else:

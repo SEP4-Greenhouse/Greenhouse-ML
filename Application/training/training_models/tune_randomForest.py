@@ -1,4 +1,5 @@
 from Application.training.utils.imports import *
+import numpy as np
 
 # === Load and process data using data_loader ===
 encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
@@ -33,6 +34,7 @@ rs_cv = RandomizedSearchCV(
     param_distributions=param_grid,
     n_iter=20,
     cv=5,
+    scoring='neg_mean_absolute_error',  # Optimize for MAE
     verbose=1,
     random_state=42,
     n_jobs=-1
@@ -43,14 +45,22 @@ rs_cv.fit(X_train, y_train)
 
 # === Get best model ===
 best_params = rs_cv.best_params_
-print(f"✅ Best Params: {best_params}")
+print(f"Best Params: {best_params}")
 
 # === Evaluate ===
 best_model = rs_cv.best_estimator_
 y_pred = best_model.predict(X_test)
 mae = mean_absolute_error(y_test, y_pred)
 r2 = r2_score(y_test, y_pred)
-print(f"📊 Regression MAE: {mae:.3f} | R²: {r2:.3f}")
+print(f"Regression MAE: {mae:.3f} | R²: {r2:.3f}")
+
+# === Feature importance analysis ===
+feature_importance = best_model.feature_importances_
+sorted_idx = np.argsort(feature_importance)
+print("\n=== Top 5 Feature Importance ===")
+for i in sorted_idx[-5:]:
+    if i < len(features):  # Ensure index is valid
+        print(f"{features[i]}: {feature_importance[i]:.4f}")
 
 # === Save model and encoder ===
 timestamp = get_timestamp()
@@ -65,6 +75,7 @@ log_data = {
     "regression_mae": round(mae, 3),
     "regression_r2": round(r2, 3),
     "features_used": features,
+    "top_features": [features[i] for i in sorted_idx[-5:] if i < len(features)]  # Top 5 features
 }
 log_path = save_log(log_data, timestamp, prefix="regression_tuned_")
 
@@ -73,3 +84,7 @@ cleanup_old_files(MODEL_DIR, "reg_model_*.pkl", keep_last=1)
 cleanup_old_files(MODEL_DIR, "reg_encoder_*.pkl", keep_last=1)
 cleanup_old_files(LOG_DIR, "regression_only_log_*.json", keep_last=1)
 cleanup_old_files(LOG_DIR, "regression_tuned_log_*.json", keep_last=1)
+
+print(f"Model saved to: {reg_path}")
+print(f"Encoder saved to: {encoder_path}")
+print(f"Log saved to: {log_path}")

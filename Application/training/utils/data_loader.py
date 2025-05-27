@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import numpy as np
 
 DATA_PATH = os.path.join("Application", "training", "data", "cleaned_data_greenhouse.csv")
 

@@ -1,15 +1,8 @@
 # === Imports ===
 from Application.training.utils.imports import *
-from Application.training.utils.file_manager import get_timestamp, save_model, save_log, cleanup_old_files
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error, r2_score
-import os
-import joblib
+import numpy as np
 
-# === Constants ===
-MODEL_DIR = os.path.join("Application", "trained_models")
-LOG_DIR = os.path.join(MODEL_DIR, "logs")
+# === Constants are already in imports.py through file_manager ===
 os.makedirs(MODEL_DIR, exist_ok=True)
 os.makedirs(LOG_DIR, exist_ok=True)
 
@@ -65,7 +58,14 @@ model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 mae = mean_absolute_error(y_test, y_pred)
 r2 = r2_score(y_test, y_pred)
-print(f"📊 MAE = {mae:.3f} | R² = {r2:.3f}")
+print(f"MAE = {mae:.3f} | R² = {r2:.3f}")
+
+# === Feature importance analysis ===
+feature_importance = model.feature_importances_
+sorted_idx = np.argsort(feature_importance)
+print("\n=== Feature Importance ===")
+for i in sorted_idx[-5:]:  # Print top 5 features
+    print(f"{features[i]}: {feature_importance[i]:.4f}")
 
 # === Save model ===
 timestamp = get_timestamp()
@@ -77,7 +77,8 @@ log_data = {
     "regressor_path": model_path,
     "regression_mae": round(mae, 3),
     "regression_r2": round(r2, 3),
-    "features_used": features
+    "features_used": features,
+    "top_features": [features[i] for i in sorted_idx[-5:]]  # Store top 5 features
 }
 save_log(log_data, timestamp, prefix="regression_only_")
 
